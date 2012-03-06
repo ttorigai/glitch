@@ -1,1 +1,4 @@
 glitch: digital photo corruption
+
+---
+Initial commit: basic desired functionality, works against single file and does small focused changes (1 to 2kb worth of changes).  Change min/max sizes and number of iterations to alter final appearance.  Smaller values result in more recognizable glitches (rather than blocks of colored static, more subtle effects).
