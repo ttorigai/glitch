@@ -8,10 +8,11 @@ namespace Glitch.Lib
 {
     public class Glitcher
     {
-        private const int FILE_MOD_COUNT = 10; // number of corruption loops to run
+        private const int FILE_MOD_COUNT = 4; // number of corruption loops to run
         private const long MIN_SIZE = 1024; // 1 kilobytes
         //private const long MAX_SIZE = 3145728; // 3 megabytes
-        private const long MAX_SIZE = 2048; // 2 kilobytes
+        //private const long MAX_SIZE = 2048; // 2 kilobytes
+        private const long MAX_SIZE = 4096; // 4 kilobytes
 
         String inputFilename;
         bool valid;
@@ -58,7 +59,7 @@ namespace Glitch.Lib
             Random r = new Random((int)DateTime.UtcNow.Ticks);
             for (int i = 0; i < FILE_MOD_COUNT; i++)
             {
-                CorruptionType t = (CorruptionType)r.Next(0, 3);
+                CorruptionType t = (CorruptionType)r.Next(0, 4);
                 Console.WriteLine("... applying type {0}", t);
                 Apply(t);
             }
