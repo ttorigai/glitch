@@ -21,6 +21,7 @@ namespace Glitch.Lib
         long origFileSize;
 
         public String Message { get; set; }
+        public String ResultFile { get; set; }
 
         enum CorruptionType { RANDOM, SWAP, REMOVE, COPY }
 
@@ -194,15 +195,18 @@ namespace Glitch.Lib
             string outName = MakeOutputFilename();
 
             using (FileStream fs = new FileStream(outName, FileMode.CreateNew))
+            {
                 fs.Write(file, 0, file.Length);
+                ResultFile = fs.Name;
+            }
         }
 
         private String MakeOutputFilename()
         {
             int idx = 0;
-            string retval = "g" + idx.ToString("00") + "_" + inputFilename;
+            string retval = "g" + idx.ToString("00") + "_" + Path.GetFileName(inputFilename);
             while (File.Exists(retval))
-                retval = "g" + (++idx).ToString("00") + "_" + inputFilename;
+                retval = "g" + (++idx).ToString("00") + "_" + Path.GetFileName(inputFilename);
             return retval;
         }
 
