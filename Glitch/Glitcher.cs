@@ -14,21 +14,34 @@ namespace Glitch.Lib
         //private const long MAX_SIZE = 2048; // 2 kilobytes
         private const long MAX_SIZE = 4096; // 4 kilobytes
 
-        String inputFilename;
+        string inputFilename;
         bool valid;
         byte[] file;
         long imageDataOffset;
         long origFileSize;
 
-        public String Message { get; set; }
-        public String ResultFile { get; set; }
+        // user variables
+        int _numberOfPasses = -1;
+        long _minSize = -1;
+        long _maxSize = -1;
+
+        public string Message { get; set; }
+        public string ResultFile { get; set; }
 
         enum CorruptionType { RANDOM, SWAP, REMOVE, COPY }
 
-        public Glitcher(String filename)
+        public Glitcher(string filename) : this(filename, -1, -1, -1)
+        { }
+
+        public Glitcher(string filename, int numPasses, int minKBytes, int maxKBytes) 
         {
             valid = true;
             inputFilename = filename;
+
+            _numberOfPasses = (numPasses > 0) ? numPasses : FILE_MOD_COUNT;
+            _minSize = (minKBytes > -1) ? minKBytes * 1024 : MIN_SIZE;
+            _maxSize = (maxKBytes > 0) ? maxKBytes * 1024 : MAX_SIZE;
+
             imageDataOffset = 0;
             Message = "initialized...";
             Validate();
@@ -58,7 +71,7 @@ namespace Glitch.Lib
             Console.WriteLine("Image data offset is {0} of file length {1}", imageDataOffset, file.Length);
 
             Random r = new Random((int)DateTime.UtcNow.Ticks);
-            for (int i = 0; i < FILE_MOD_COUNT; i++)
+            for (int i = 0; i < _numberOfPasses; i++)
             {
                 CorruptionType t = (CorruptionType)r.Next(0, 4);
                 Console.WriteLine("... applying type {0}", t);
@@ -262,7 +275,7 @@ namespace Glitch.Lib
         {
             Random r = new Random((int)DateTime.UtcNow.Ticks);
 
-            Tuple<long, long> range = generateRange(r, imageDataOffset, file.Length, MIN_SIZE, MAX_SIZE);
+            Tuple<long, long> range = generateRange(r, imageDataOffset, file.Length, _minSize, _maxSize);
 
             byte[] randomBytes = new byte[range.Item2 - range.Item1];
             r.NextBytes(randomBytes);
@@ -273,7 +286,7 @@ namespace Glitch.Lib
         {
             Random r = new Random((int)DateTime.UtcNow.Ticks);
 
-            Tuple<long, long> range = generateRange(r, imageDataOffset, file.Length, MIN_SIZE, MAX_SIZE);
+            Tuple<long, long> range = generateRange(r, imageDataOffset, file.Length, _minSize, _maxSize);
 
             byte[] copyData = new byte[range.Item2 - range.Item1];
             for (long i = range.Item1, j = 0; i < range.Item2; i++, j++)
@@ -300,7 +313,7 @@ namespace Glitch.Lib
 
             Random r = new Random((int)DateTime.UtcNow.Ticks);
 
-            Tuple<long, long> range = generateRange(r, imageDataOffset, file.Length, MIN_SIZE, MAX_SIZE);
+            Tuple<long, long> range = generateRange(r, imageDataOffset, file.Length, _minSize, _maxSize);
 
             file = RemoveRange(file, range.Item1, range.Item2 - range.Item1);
         }
@@ -308,7 +321,7 @@ namespace Glitch.Lib
         private void SwapCorrupt()
         {
             Random r = new Random((int)DateTime.UtcNow.Ticks);
-            Tuple<long, long> range1 = generateRange(r, imageDataOffset, file.Length, MIN_SIZE, MAX_SIZE);
+            Tuple<long, long> range1 = generateRange(r, imageDataOffset, file.Length, _minSize, _maxSize);
             // second range starts between same start and end of file minus size of first range
             long range2start = LongRandom(imageDataOffset, file.Length - (range1.Item2 - range1.Item1), r);
             long range2end = range2start + (range1.Item2 - range1.Item1);

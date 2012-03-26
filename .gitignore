@@ -43,6 +43,8 @@ ehthumbs.db
 [Bb]in/*
 deploy
 deploy/*
+publish
+publish/*
 _ReSharper.*
 *.csproj.user
 *.Resharper.user
@@ -52,6 +54,7 @@ _ReSharper.*
 ~$*
 *.licx
 */obj
+*.pfx
 
 #  Pro Power Tools Document Tab Well Tracking #
 ###############################################
